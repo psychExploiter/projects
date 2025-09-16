@@ -1,0 +1,79 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>Minimal Counter</title>
+  <style>
+    :root{--bg:#0b0b0d;--card:#0f1113;--muted:#9aa0a6;--accent:#6ee7b7}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:linear-gradient(180deg,var(--bg),#050506);color:#fff}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
+    .card{width:100%;max-width:420px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:18px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.03);text-align:center}
+    .title{font-size:14px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px}
+    .counter{font-weight:700;font-size:76px;line-height:1;margin:6px 0 18px}
+    .hint{font-size:13px;color:var(--muted);margin-bottom:22px}
+    .btn{
+      -webkit-tap-highlight-color: transparent;
+      appearance:none;border:0;padding:14px 22px;border-radius:14px;font-size:18px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:12px;background:linear-gradient(90deg,#0b1220, #0b1624);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,0.6);transition:transform .06s ease, box-shadow .06s ease;
+    }
+    .btn:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(0,0,0,0.5)}
+    .small{font-size:12px;color:var(--muted);margin-top:14px}
+    /* make button large and thumb-friendly on small screens */
+    @media (max-width:420px){.btn{width:100%;justify-content:center;padding:16px 18px;border-radius:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="application">
+      <div class="title">Minimal Counter</div>
+      <div id="count" class="counter" aria-live="polite">0</div>
+      <div class="hint">Tap the button below to increase the count</div>
+      <button id="btn" class="btn" aria-label="Increment counter">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Tap to count
+      </button>
+      <div class="small">Designed for Android - minimal, touch-friendly UI</div>
+    </div>
+  </div>  <script>
+    (function(){
+      const btn = document.getElementById('btn');
+      const countEl = document.getElementById('count');
+      let count = 0;
+
+      // Optional: restore last value if user wants persistence
+      if (localStorage.getItem('minimal-counter') !== null) {
+        const v = parseInt(localStorage.getItem('minimal-counter'), 10);
+        if (!Number.isNaN(v)) { count = v; countEl.textContent = count }
+      }
+
+      // increment function
+      function increment() {
+        count += 1;
+        countEl.textContent = count;
+        // small vibration on supported Android devices
+        try{ if (navigator.vibrate) navigator.vibrate(24) }catch(e){}
+        // save (lightweight persistence)
+        try{ localStorage.setItem('minimal-counter', String(count)) }catch(e){}
+      }
+
+      // click and touch
+      btn.addEventListener('click', increment, {passive:true});
+
+      // support keyboard activation for accessibility
+      btn.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); increment() }
+      });
+
+      // quick double-tap protection: prevents accidental double increments from some touch drivers
+      let lastTap = 0;
+      btn.addEventListener('touchend', (e)=>{
+        const now = Date.now();
+        if (now - lastTap < 50) e.preventDefault();
+        lastTap = now;
+      }, {passive:true});
+
+    })();
+  </script></body>
+</html>
